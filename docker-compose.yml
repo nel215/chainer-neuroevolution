@@ -14,7 +14,7 @@ services:
       - data:/data
   worker:
     build: .
-    command: ['dask-worker', 'scheduler:8786', '--nthreads', '1']
+    command: ['dask-worker', '--nthreads', '1', 'scheduler:8786']
     volumes:
       - .:/workdir
       - data:/data
