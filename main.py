@@ -61,6 +61,33 @@ def initialize_network(seed, store=False, name=None):
     return seed, total_reward
 
 
+def update_network(seed):
+    set_random_seed(seed)
+    env = gym.make('CartPole-v0')
+    env.seed(0)
+    n_action = env.action_space.n
+    dnn = DNN(n_action)
+    rank = random.randint(0, 2)
+    if seed == 0:
+        name = 'top-0'
+    else:
+        name = 'top-{}'.format(rank)
+    model_store = ModelStore()
+    dnn = model_store.load(name, dnn)
+    if seed > 0:
+        dnn.update()
+    state = env.reset()
+    total_reward = 0
+    while True:
+        act = get_action(state, dnn)
+        state, reward, done, info = env.step(act)
+        total_reward += reward
+        if done:
+            break
+
+    return seed, total_reward
+
+
 def main():
     client = Client('scheduler:8786')
     futures = client.map(initialize_network, range(10))
@@ -76,6 +103,11 @@ def main():
             initialize_network, seed, store=True, name=name))
     results = client.gather(futures)
     print(results, flush=True)
+
+    futures = client.map(update_network, range(10))
+    results = client.gather(futures)
+    print(results, flush=True)
+
     env = gym.make('CartPole-v0')
     env.reset()
     img = Image.fromarray(env.render(mode='rgb_array'))
