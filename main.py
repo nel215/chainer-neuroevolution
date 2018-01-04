@@ -5,6 +5,8 @@ import chainer.links as L
 import chainer.functions as F
 import random
 from PIL import Image
+from dask.distributed import Client
+from neuroevolution import ModelStore
 
 
 def set_random_seed(seed):
@@ -33,7 +35,7 @@ def get_action(state, dnn):
     return int(act.data)
 
 
-def initialize_network(seed):
+def initialize_network(seed, store=False, name=None):
     set_random_seed(seed)
     env = gym.make('CartPole-v0')
     env.seed(seed)
@@ -48,12 +50,28 @@ def initialize_network(seed):
         if done:
             break
 
-    print(total_reward)
+    if store:
+        model_store = ModelStore()
+        model_store.save(name, dnn)
+
     return seed, total_reward
 
 
 def main():
-    initialize_network(215)
+    client = Client('scheduler:8786')
+    futures = client.map(initialize_network, range(10))
+    results = client.gather(futures)
+    results.sort(key=lambda x: -x[1])
+    print(results)
+
+    truncated = list(map(lambda x: x[0], results[:3]))
+    futures = []
+    for i, seed in enumerate(truncated):
+        name = 'top-{}'.format(i)
+        futures.append(client.submit(
+            initialize_network, seed, store=True, name=name))
+    results = client.gather(futures)
+    print(results)
     env = gym.make('CartPole-v0')
     env.reset()
     img = Image.fromarray(env.render(mode='rgb_array'))
