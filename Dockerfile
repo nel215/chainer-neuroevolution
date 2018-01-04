@@ -5,5 +5,6 @@ RUN apt install -y xvfb
 RUN pip install gym
 RUN apt install -y python-opengl
 RUN pip install pillow
+RUN pip install chainer
 
 WORKDIR /workdir
