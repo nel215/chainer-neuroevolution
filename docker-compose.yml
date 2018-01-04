@@ -5,13 +5,19 @@ services:
     command: ['sh', './test.sh']
     volumes:
       - .:/workdir
+      - data:/data
   scheduler:
     build: .
     command: ['dask-scheduler', '--host', '0.0.0.0']
     volumes:
       - .:/workdir
+      - data:/data
   worker:
     build: .
     command: ['dask-worker', 'scheduler:8786', '--nthreads', '1']
     volumes:
       - .:/workdir
+      - data:/data
+volumes:
+  data:
+    driver: local
