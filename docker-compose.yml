@@ -8,6 +8,10 @@ services:
   scheduler:
     build: .
     command: ['dask-scheduler', '--host', '0.0.0.0']
+    volumes:
+      - .:/workdir
   worker:
     build: .
     command: ['dask-worker', 'scheduler:8786', '--nthreads', '1']
+    volumes:
+      - .:/workdir
