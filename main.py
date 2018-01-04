@@ -62,7 +62,7 @@ def main():
     futures = client.map(initialize_network, range(10))
     results = client.gather(futures)
     results.sort(key=lambda x: -x[1])
-    print(results)
+    print(results, flush=True)
 
     truncated = list(map(lambda x: x[0], results[:3]))
     futures = []
@@ -71,7 +71,7 @@ def main():
         futures.append(client.submit(
             initialize_network, seed, store=True, name=name))
     results = client.gather(futures)
-    print(results)
+    print(results, flush=True)
     env = gym.make('CartPole-v0')
     env.reset()
     img = Image.fromarray(env.render(mode='rgb_array'))
