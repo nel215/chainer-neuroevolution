@@ -21,6 +21,10 @@ class DNN(chainer.Chain):
             self.l1 = L.Linear(None, 5)
             self.l2 = L.Linear(None, n_action)
 
+    def update(self):
+        for p in self.params():
+            p.data += np.random.randn(*p.shape) * 0.005
+
     def __call__(self, x):
         h1 = F.relu(self.l1(x))
         y = self.l2(x)
