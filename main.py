@@ -38,7 +38,7 @@ def get_action(state, dnn):
 def initialize_network(seed, store=False, name=None):
     set_random_seed(seed)
     env = gym.make('CartPole-v0')
-    env.seed(seed)
+    env.seed(0)
     n_action = env.action_space.n
     dnn = DNN(n_action)
     state = env.reset()
