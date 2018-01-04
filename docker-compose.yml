@@ -10,4 +10,4 @@ services:
     command: ['dask-scheduler', '--host', '0.0.0.0']
   worker:
     build: .
-    command: ['dask-worker', 'scheduler:8786']
+    command: ['dask-worker', 'scheduler:8786', '--nthreads', '1']
