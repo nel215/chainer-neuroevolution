@@ -18,6 +18,8 @@ services:
     volumes:
       - .:/workdir
       - data:/data
+    environment:
+      - PYTHONPATH=/workdir
 volumes:
   data:
     driver: local
