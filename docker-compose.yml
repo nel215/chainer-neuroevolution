@@ -5,3 +5,6 @@ services:
     command: ['sh', './test.sh']
     volumes:
       - .:/workdir
+  scheduler:
+    build: .
+    command: ['dask-scheduler', '--host', '0.0.0.0']
