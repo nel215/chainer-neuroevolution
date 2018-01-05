@@ -61,7 +61,7 @@ def initialize_network(seed, store=False, name=None):
     return seed, total_reward
 
 
-def update_network(seed):
+def update_network(seed, store=False, name=None):
     set_random_seed(seed)
     env = gym.make('CartPole-v0')
     env.seed(0)
@@ -85,6 +85,10 @@ def update_network(seed):
         if done:
             break
 
+    if store:
+        model_store = ModelStore()
+        model_store.save(name, dnn)
+
     return seed, total_reward
 
 
@@ -93,7 +97,6 @@ def main():
     futures = client.map(initialize_network, range(10))
     results = client.gather(futures)
     results.sort(key=lambda x: -x[1])
-    print(results, flush=True)
 
     truncated = list(map(lambda x: x[0], results[:3]))
     futures = []
@@ -104,14 +107,19 @@ def main():
     results = client.gather(futures)
     print(results, flush=True)
 
-    futures = client.map(update_network, range(10))
-    results = client.gather(futures)
-    print(results, flush=True)
+    for g in range(10):
+        futures = client.map(update_network, range(10))
+        results = client.gather(futures)
+        results.sort(key=lambda x: -x[1])
+        truncated = list(map(lambda x: x[0], results[:3]))
 
-    env = gym.make('CartPole-v0')
-    env.reset()
-    img = Image.fromarray(env.render(mode='rgb_array'))
-    img.save('./hoge.png')
+        futures = []
+        for i, seed in enumerate(truncated):
+            name = 'top-{}'.format(i)
+            futures.append(client.submit(
+                update_network, seed, store=True, name=name))
+        results = client.gather(futures)
+        print(results, flush=True)
 
 
 if __name__ == '__main__':
