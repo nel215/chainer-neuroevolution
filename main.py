@@ -1,11 +1,11 @@
 import os
 import numpy as np
-import gym
 import random
 from PIL import Image
 from dask.distributed import Client
 from neuroevolution import MinioModelStore
 from neuroevolution.model import create_model
+from neuroevolution.environment import create_environment
 
 
 def set_random_seed(seed):
@@ -23,7 +23,7 @@ def get_model_store():
 
 def initialize_network(seed, store=False, name=None):
     set_random_seed(seed)
-    env = gym.make('CartPole-v0')
+    env = create_environment()
     n_action = env.action_space.n
     agent = create_model(n_action)
     total_reward = run_episode(env, agent)
@@ -52,7 +52,7 @@ def run_episode(env, agent):
 
 def update_network(seed, generation, store=False, name=None):
     set_random_seed(seed)
-    env = gym.make('CartPole-v0')
+    env = create_environment()
     n_action = env.action_space.n
     agent = create_model(n_action)
     rank = random.randint(0, 2)
