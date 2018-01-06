@@ -18,22 +18,22 @@ class MinioModelStore(object):
             'minio:9000', self.access_key, self.secret_key, secure=False)
         return client
 
-    def save(self, name, model):
+    def save(self, name, generation, model):
         client = self._get_client()
         try:
             client.make_bucket(self.bucket)
         except BucketAlreadyOwnedByYou:
             pass
-        fname = 'model/{}.npz'.format(name)
+        fname = 'model/{}/{}.npz'.format(generation, name)
         fp = BytesIO()
         serializers.save_npz(fp, model)
         length = len(fp.getvalue())
         fp.seek(0)
         client.put_object(self.bucket, fname, fp, length)
 
-    def load(self, name, model):
+    def load(self, name, generation, model):
         client = self._get_client()
-        fname = 'model/{}.npz'.format(name)
+        fname = 'model/{}/{}.npz'.format(generation, name)
         resp = client.get_object(self.bucket, fname)
         serializers.load_npz(BytesIO(resp.data), model)
         return model

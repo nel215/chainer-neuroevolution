@@ -29,8 +29,9 @@ def initialize_network(seed, store=False, name=None):
     total_reward = run_episode(env, agent)
 
     if store:
+        generation = 0
         model_store = get_model_store()
-        model_store.save(name, agent)
+        model_store.save(name, generation, agent)
 
     return seed, total_reward
 
@@ -49,7 +50,7 @@ def run_episode(env, agent):
     return total_reward
 
 
-def update_network(seed, store=False, name=None):
+def update_network(seed, generation, store=False, name=None):
     set_random_seed(seed)
     env = gym.make('CartPole-v0')
     n_action = env.action_space.n
@@ -61,14 +62,14 @@ def update_network(seed, store=False, name=None):
         pre_model_name = 'top-{}'.format(rank)
 
     model_store = get_model_store()
-    agent = model_store.load(pre_model_name, agent)
+    agent = model_store.load(pre_model_name, generation-1, agent)
     if seed > 0:
         agent.update()
 
     total_reward = run_episode(env, agent)
 
     if store:
-        model_store.save(name, agent)
+        model_store.save(name, generation, agent)
 
     return seed, total_reward
 
@@ -89,7 +90,10 @@ def main():
     print(results, flush=True)
 
     for g in range(10):
-        futures = client.map(update_network, range(10))
+        futures = []
+        for seed in range(n_mutation):
+            futures.append(client.submit(
+                update_network, seed, g+1))
         results = client.gather(futures)
         results.sort(key=lambda x: -x[1])
         truncated = list(map(lambda x: x[0], results[:3]))
@@ -98,7 +102,7 @@ def main():
         for i, seed in enumerate(truncated):
             name = 'top-{}'.format(i)
             futures.append(client.submit(
-                update_network, seed, store=True, name=name))
+                update_network, seed, g+1, store=True, name=name))
         results = client.gather(futures)
         print(results, flush=True)
 
