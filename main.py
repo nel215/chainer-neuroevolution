@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import gym
 import chainer
@@ -6,12 +7,20 @@ import chainer.functions as F
 import random
 from PIL import Image
 from dask.distributed import Client
-from neuroevolution import ModelStore
+from neuroevolution import MinioModelStore
 
 
 def set_random_seed(seed):
     random.seed(seed)
     np.random.seed(seed)
+
+
+def get_model_store():
+    model_store = MinioModelStore(
+        os.environ['MINIO_ACCESS_KEY'],
+        os.environ['MINIO_SECRET_KEY'],
+    )
+    return model_store
 
 
 class DNN(chainer.Chain):
@@ -55,7 +64,7 @@ def initialize_network(seed, store=False, name=None):
             break
 
     if store:
-        model_store = ModelStore()
+        model_store = get_model_store()
         model_store.save(name, dnn)
 
     return seed, total_reward
@@ -72,7 +81,8 @@ def update_network(seed, store=False, name=None):
         name = 'top-0'
     else:
         name = 'top-{}'.format(rank)
-    model_store = ModelStore()
+
+    model_store = get_model_store()
     dnn = model_store.load(name, dnn)
     if seed > 0:
         dnn.update()
@@ -86,7 +96,6 @@ def update_network(seed, store=False, name=None):
             break
 
     if store:
-        model_store = ModelStore()
         model_store.save(name, dnn)
 
     return seed, total_reward
