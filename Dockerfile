@@ -9,3 +9,7 @@ RUN pip install chainer
 RUN pip install dask distributed
 
 WORKDIR /workdir
+
+ADD ./test.sh ./test.sh
+ADD ./neuroevolution ./neuroevolution
+ADD ./main.py ./main.py

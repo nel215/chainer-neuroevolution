@@ -1,2 +1,2 @@
 image:
-	docker build -t nel215/neuroevolution:0.1 .
+	docker build -t nel215/neuroevolution:0.2 .
