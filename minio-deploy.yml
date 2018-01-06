@@ -1,0 +1,28 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: minio-deploy
+spec:
+  selector:
+    matchLabels:
+      role: minio
+  template:
+    metadata:
+      labels:
+        role: minio
+    spec:
+      containers:
+      - name: minio
+        image: minio/minio
+        args: ['minio', 'server', '/data']
+        env:
+        - name: MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio-secret
+              key: accesskey
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio-secret
+              key: secretkey
