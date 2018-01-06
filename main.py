@@ -24,31 +24,36 @@ def get_model_store():
 def initialize_network(seed, store=False, name=None):
     set_random_seed(seed)
     env = gym.make('CartPole-v0')
-    env.seed(0)
     n_action = env.action_space.n
-    dnn = create_model(n_action)
+    agent = create_model(n_action)
+    total_reward = run_episode(env, agent)
+
+    if store:
+        model_store = get_model_store()
+        model_store.save(name, agent)
+
+    return seed, total_reward
+
+
+def run_episode(env, agent):
+    env.seed(0)
     state = env.reset()
     total_reward = 0
     while True:
-        act = dnn.get_action(state)
+        act = agent.get_action(state)
         state, reward, done, info = env.step(act)
         total_reward += reward
         if done:
             break
 
-    if store:
-        model_store = get_model_store()
-        model_store.save(name, dnn)
-
-    return seed, total_reward
+    return total_reward
 
 
 def update_network(seed, store=False, name=None):
     set_random_seed(seed)
     env = gym.make('CartPole-v0')
-    env.seed(0)
     n_action = env.action_space.n
-    dnn = create_model(n_action)
+    agent = create_model(n_action)
     rank = random.randint(0, 2)
     if seed == 0:
         pre_model_name = 'top-0'
@@ -56,20 +61,14 @@ def update_network(seed, store=False, name=None):
         pre_model_name = 'top-{}'.format(rank)
 
     model_store = get_model_store()
-    dnn = model_store.load(pre_model_name, dnn)
+    agent = model_store.load(pre_model_name, agent)
     if seed > 0:
-        dnn.update()
-    state = env.reset()
-    total_reward = 0
-    while True:
-        act = dnn.get_action(state)
-        state, reward, done, info = env.step(act)
-        total_reward += reward
-        if done:
-            break
+        agent.update()
+
+    total_reward = run_episode(env, agent)
 
     if store:
-        model_store.save(name, dnn)
+        model_store.save(name, agent)
 
     return seed, total_reward
 
