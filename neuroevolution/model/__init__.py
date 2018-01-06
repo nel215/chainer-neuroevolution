@@ -8,7 +8,7 @@ class DNN(chainer.Chain):
     def __init__(self, n_action):
         super(DNN, self).__init__()
         with self.init_scope():
-            self.l1 = L.Linear(None, 5)
+            self.l1 = L.Linear(None, 30)
             self.l2 = L.Linear(None, n_action)
 
     def update(self):

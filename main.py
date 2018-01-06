@@ -75,8 +75,9 @@ def update_network(seed, generation, store=False, name=None):
 
 
 def main():
+    n_mutation = 100
     client = Client('scheduler:8786')
-    futures = client.map(initialize_network, range(10))
+    futures = client.map(initialize_network, range(n_mutation))
     results = client.gather(futures)
     results.sort(key=lambda x: -x[1])
 
