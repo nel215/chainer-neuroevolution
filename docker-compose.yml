@@ -6,6 +6,11 @@ services:
     volumes:
       - .:/workdir
       - data:/data
+    environment:
+    - MINIO_ACCESS_KEY
+    - MINIO_SECRET_KEY
+    depends_on:
+    - minio
   scheduler:
     build: .
     command: ['dask-scheduler', '--host', '0.0.0.0']
@@ -20,6 +25,12 @@ services:
       - data:/data
     environment:
       - PYTHONPATH=/workdir
+  minio:
+    image: minio/minio
+    command: ['minio', 'server', '/data']
+    environment:
+    - MINIO_ACCESS_KEY
+    - MINIO_SECRET_KEY
 volumes:
   data:
     driver: local
