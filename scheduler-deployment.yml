@@ -1,0 +1,22 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: scheduler-deployment
+  labels:
+    role: scheduler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      role: scheduler
+  template:
+    metadata:
+      labels:
+        role: scheduler
+    spec:
+      containers:
+      - name: scheduler
+        image: nel215/neuroevolution:0.2
+        command: ['dask-scheduler']
+        ports:
+          - containerPort: 8786

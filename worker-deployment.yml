@@ -1,0 +1,21 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: worker-deployment
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      role: worker
+  template:
+    metadata:
+      labels:
+        role: worker
+    spec:
+      containers:
+      - name: worker
+        image: nel215/neuroevolution:0.2
+        command: ['dask-worker', '--nthreads', '1', 'scheduler:8786']
+        env:
+        - name: PYTHONPATH
+          value: /workdir

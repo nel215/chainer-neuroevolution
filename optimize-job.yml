@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: optimize
+spec:
+  template:
+    metadata:
+      name: optimize
+    spec:
+      containers:
+      - name: optimize
+        image: nel215/neuroevolution:0.2
+        command: ['sh', './test.sh']
+      restartPolicy: Never
