@@ -78,12 +78,12 @@ def update_network(seed, store=False, name=None):
     dnn = DNN(n_action)
     rank = random.randint(0, 2)
     if seed == 0:
-        name = 'top-0'
+        pre_model_name = 'top-0'
     else:
-        name = 'top-{}'.format(rank)
+        pre_model_name = 'top-{}'.format(rank)
 
     model_store = get_model_store()
-    dnn = model_store.load(name, dnn)
+    dnn = model_store.load(pre_model_name, dnn)
     if seed > 0:
         dnn.update()
     state = env.reset()
